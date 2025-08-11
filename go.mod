@@ -1,4 +1,4 @@
-module protobuff
+module github.com/Rustamchick/protobuff
 
 go 1.24.2
 
