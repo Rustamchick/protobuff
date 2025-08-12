@@ -1,10 +1,18 @@
 package main
 
 import (
-	grpcpetv1 "github.com/Rustamchick/protobuff"
+	"fmt"
+	"grpc-pet/pkg/config"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	var req grpcpetv1.RegisterRequest{}
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("error loading env vars: ", err)
+	}
 
+	cfg := config.MustInitConfig()
+
+	fmt.Printf("config: %+v", cfg)
 }

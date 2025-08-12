@@ -1,0 +1,6 @@
+env: "local"
+storage_path: "storage_path_is_in_development"
+token_ttl: 12h
+grpc:
+  port: 8080
+  timeout: 1h
