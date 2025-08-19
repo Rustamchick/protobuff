@@ -1,18 +1,24 @@
 package main
 
 import (
-	"fmt"
+	"grpc-pet/cmd/test"
 	"grpc-pet/pkg/config"
 
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
+	// logrus.New()
+
+	logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+	logrus.SetLevel(logrus.DebugLevel)
+
 	if err := godotenv.Load(); err != nil {
-		fmt.Println("error loading env vars: ", err)
+		logrus.Errorf("error loading env vars: %s", err)
 	}
 
-	cfg := config.MustInitConfig()
+	cfg := config.InitConfig()
 
-	fmt.Printf("config: %+v", cfg)
+	test.TestAll(cfg)
 }

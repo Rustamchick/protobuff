@@ -19,7 +19,7 @@ type GrpcConfig struct {
 	Timeout time.Duration `yaml:"timeout" env-required:"true"`
 }
 
-func MustInitConfig() Config {
+func InitConfig() Config {
 	path := getConfigPath()
 	if path == "" {
 		panic("Empty config path")
