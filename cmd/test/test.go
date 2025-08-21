@@ -1,31 +1,61 @@
-package test
+package main
 
 import (
+	grpcapp "grpc-pet/pkg/app/grpc"
 	"grpc-pet/pkg/config"
 	"time"
 
 	grpcpetv1 "github.com/Rustamchick/protobuff/gen/go/pet"
+	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
-func TestAll(cfg config.Config) {
+func main() {
+	log := logrus.New()
+
+	log.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+	log.SetLevel(logrus.DebugLevel)
+
+	if err := godotenv.Load(); err != nil {
+		log.Errorf("error loading env vars: %s", err)
+	}
+
+	cfg := config.InitConfig()
+
+	app := grpcapp.New(log, cfg.GRPC.Port)
+	app.MustRun()
+
+	go func(app *grpcapp.App) {
+		time.Sleep(time.Second * 3)
+		app.Stop()
+	}(&grpcapp.App{})
+
+	TestAll(cfg, log)
+}
+
+func TestAll(cfg config.Config, Log *logrus.Logger) {
+	const op = "test"
+	log := Log.WithField("op", op)
 	cfg_t := config.Config{
 		Env:          "local",
 		Storage_path: "storage_path_is_in_development",
 		TokenTTL:     time.Hour * 12,
 		GRPC: config.GrpcConfig{
-			Port:    8080,
+			Port:    9090,
 			Timeout: time.Hour,
 		},
 	}
 
 	if cfg == cfg_t {
-		logrus.Info("config \033[32mCORRECT\033[0m")
+		log.Info("config \033[32mCORRECT\033[0m")
 	}
 
 	req := grpcpetv1.RegisterRequest{}
-	if req.Email == "" { // в будущем подумаю о нормальной тестировке этого пакета, но пока что по сути только вывожу карсивую надпись
-		logrus.Infof("Protobuff \033[32mCORRECT\033[0m")
+
+	// if proto.Equal(req, req2) {}
+
+	if req.Email == "" { // в будущем подумаю о нормальной тестировке этого пакета,
+		log.Infof("Protobuff \033[32mCORRECT\033[0m") //  но пока что по сути только вывожу красивую надпись
 	}
 
 }

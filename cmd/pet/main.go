@@ -1,24 +1,35 @@
 package main
 
 import (
-	"grpc-pet/cmd/test"
+	"grpc-pet/pkg/app"
 	"grpc-pet/pkg/config"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	// logrus.New()
+	log := logrus.New()
 
-	logrus.SetFormatter(&logrus.TextFormatter{ForceColors: true})
-	logrus.SetLevel(logrus.DebugLevel)
+	log.SetFormatter(&logrus.TextFormatter{ForceColors: true})
+	log.SetLevel(logrus.DebugLevel)
 
 	if err := godotenv.Load(); err != nil {
-		logrus.Errorf("error loading env vars: %s", err)
+		log.Errorf("error loading env vars: %s", err)
 	}
 
 	cfg := config.InitConfig()
 
-	test.TestAll(cfg)
+	application := app.New(log, cfg.GRPC.Port, cfg.Storage_path, cfg.TokenTTL)
+
+	go application.GRPCApp.MustRun()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+	<-stop
+
+	application.GRPCApp.Stop()
 }
